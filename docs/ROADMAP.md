@@ -29,7 +29,7 @@ A step-by-step development guide for building a Next.js wellness reminder applic
 
 ---
 
-### Step 1.2: Database Setup with Prisma
+### Step 1.2: Database Setup with Prisma - DONE
 **Goal**: Set up Prisma with SQLite and create database schema
 
 **Tasks**:
@@ -56,7 +56,7 @@ A step-by-step development guide for building a Next.js wellness reminder applic
 **Tasks**:
 - Install JWT and bcrypt dependencies
 - Create authentication utilities (JWT sign/verify, password hashing)
-- Build login API route
+- Build login server actions
 - Create login page with form
 - Implement authentication middleware
 - Set up protected route wrapper
@@ -64,8 +64,7 @@ A step-by-step development guide for building a Next.js wellness reminder applic
 
 **Files to create**:
 - `lib/auth.ts` authentication utilities
-- `app/api/auth/login/route.ts` login API
-- `app/api/auth/logout/route.ts` logout API  
+- `lib/actions/auth.actions.ts` authentication server actions
 - `app/login/page.tsx` login page
 - `middleware.ts` route protection
 - `components/ProtectedRoute.tsx` wrapper component
