@@ -1,0 +1,331 @@
+# Wellness Tracker - Cursor Rules
+
+## Project Overview
+Next.js 15+ wellness reminder application with Prisma, SQLite, and mobile-first design. Open-source project requiring security best practices.
+
+## Core Technologies
+- Next.js 15+ (App Router)
+- TypeScript
+- Tailwind CSS 4.0+ (utility-first, no custom CSS files)
+- Prisma with SQLite
+- shadcn/ui components
+- React Hook Form for all forms
+- JWT authentication
+
+## Security & Open Source Requirements
+- NEVER commit sensitive information (API keys, passwords, secrets)
+- Use environment variables for all sensitive data
+- Create .env.example with placeholder values
+- Add comprehensive .gitignore for sensitive files
+- Use secure defaults and validate all inputs
+- Implement proper CORS and security headers
+
+## UI/UX Guidelines
+
+### Component Strategy
+- ALWAYS use shadcn/ui components when available
+- Check shadcn/ui documentation before creating custom components
+- Only create custom components when shadcn doesn't provide the functionality
+- Extend shadcn components with Tailwind classes, not custom CSS
+
+### Styling Rules
+- ONLY use Tailwind CSS utility classes
+- NO inline styles, NO .scss files, NO .css files (except globals.css for Tailwind imports)
+- NO custom CSS modules or styled-components
+- Use Tailwind's design system (spacing, colors, typography)
+- Mobile-first responsive design (sm:, md:, lg:, xl: breakpoints)
+- DARK MODE ONLY - no light mode support needed
+
+## Dark Mode Design System
+
+### Color Palette
+- **Background**: Use `bg-background` (typically slate-950/black tones)
+- **Cards/Surfaces**: Use `bg-card` (typically slate-900/slate-800)
+- **Primary Actions**: Use `bg-primary` with `text-primary-foreground`
+- **Secondary Actions**: Use `bg-secondary` with `text-secondary-foreground`
+- **Accent Colors**: Use `bg-accent` for highlights and hover states
+- **Text Hierarchy**:
+  - Primary text: `text-foreground` 
+  - Secondary text: `text-muted-foreground`
+  - Destructive: `text-destructive`
+  - Success: `text-green-400` or `text-emerald-400`
+  - Warning: `text-amber-400` or `text-yellow-400`
+
+### Semantic Color Usage
+- **Success States**: `text-green-400`, `bg-green-400/10`, `border-green-400/20`
+- **Error States**: `text-destructive`, `bg-destructive/10`, `border-destructive/20`
+- **Warning States**: `text-amber-400`, `bg-amber-400/10`, `border-amber-400/20`
+- **Info States**: `text-blue-400`, `bg-blue-400/10`, `border-blue-400/20`
+- **Neutral States**: `text-muted-foreground`, `bg-muted`, `border-border`
+
+### Surface Elevation
+- **Base Background**: `bg-background` (deepest level)
+- **Card/Panel**: `bg-card` (elevated from background)
+- **Popover/Dialog**: `bg-popover` (highest elevation)
+- **Input Fields**: `bg-background` with `border-input`
+- **Hover States**: Add `/50` or `/80` opacity variants for subtle effects
+
+### Border and Divider System
+- **Default Borders**: `border-border` (subtle, low contrast)
+- **Input Borders**: `border-input` 
+- **Focus Borders**: `focus:border-ring` or `focus:ring-ring`
+- **Dividers**: `border-border` with appropriate opacity
+
+### Interactive States
+- **Hover Effects**: 
+  - Buttons: `hover:bg-primary/90`
+  - Cards: `hover:bg-card/80`
+  - Links: `hover:text-foreground`
+- **Focus Styles**: Always include `focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2`
+- **Active States**: Use slightly darker variants of base colors
+- **Disabled States**: Use `opacity-50 cursor-not-allowed`
+
+### Typography Scale
+- **Headings**: 
+  - H1: `text-4xl font-bold text-foreground`
+  - H2: `text-3xl font-semibold text-foreground`
+  - H3: `text-2xl font-semibold text-foreground`
+  - H4: `text-xl font-medium text-foreground`
+- **Body Text**: 
+  - Primary: `text-sm text-foreground`
+  - Secondary: `text-sm text-muted-foreground`
+  - Caption: `text-xs text-muted-foreground`
+- **Interactive Text**: 
+  - Links: `text-primary hover:text-primary/80`
+  - Buttons: Use appropriate foreground colors
+
+### Component-Specific Guidelines
+- **Cards**: `bg-card border border-border rounded-lg shadow-sm`
+- **Buttons**: Follow shadcn variants (default, destructive, outline, secondary, ghost)
+- **Input Fields**: `bg-background border-input focus:border-ring`
+- **Navigation**: Use `bg-card` for nav bars, `text-muted-foreground` for inactive items
+- **Alerts/Badges**: Use semantic colors with low opacity backgrounds
+
+### Animation and Transitions
+- **Standard Transitions**: `transition-colors duration-200`
+- **Hover Transitions**: `transition-all duration-200 ease-in-out`
+- **Focus Transitions**: `transition-all duration-150`
+- **Loading States**: Use `animate-pulse` or `animate-spin` appropriately
+
+### Mobile-Specific Dark Mode Considerations
+- Ensure sufficient contrast for outdoor mobile usage
+- Use slightly brighter variants on smaller screens when needed
+- Test readability at various brightness levels
+- Consider battery impact of pure black vs dark gray backgrounds
+
+### Accessibility in Dark Mode
+- Maintain WCAG AA contrast ratios (4.5:1 for normal text)
+- Use `text-foreground` and `text-muted-foreground` for proper contrast
+- Avoid pure white text on pure black (use off-white/gray)
+- Test with high contrast mode enabled
+- Ensure focus indicators are visible
+
+### Examples of Good Dark Mode Usage
+```tsx
+// Good: Card component with proper dark mode styling
+<div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+  <h3 className="text-xl font-semibold text-foreground mb-2">Card Title</h3>
+  <p className="text-sm text-muted-foreground mb-4">Card description</p>
+  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+    Action
+  </Button>
+</div>
+
+// Good: Form input with proper styling
+<Input 
+  className="bg-background border-input focus:border-ring focus:ring-ring" 
+  placeholder="Enter text..."
+/>
+
+// Good: Status indicators
+<Badge className="bg-green-400/10 text-green-400 border-green-400/20">
+  Active
+</Badge>
+```
+
+### Form Handling
+- ALWAYS use React Hook Form for ALL forms
+- Use Zod for form validation schemas
+- Integrate with shadcn/ui form components
+- Implement proper error handling and display
+- Use controlled components pattern with React Hook Form
+
+## Code Quality Standards
+
+### Comments Policy
+- AVOID unnecessary comments for self-explanatory code
+- ADD descriptive comments ONLY for complex business logic
+- Document complex algorithms, regex patterns, or non-obvious implementations
+- Use JSDoc for function documentation when logic is complex
+- Comment on security-related code and validation logic
+
+### TypeScript Requirements
+- Use strict TypeScript configuration
+- Define proper interfaces and types
+- NO 'any' types unless absolutely necessary
+- Use Prisma-generated types where applicable
+- Create custom types in types/ directory
+
+### File Organization
+```
+src/
+├── app/                 # Next.js App Router pages
+├── components/          # Reusable components
+│   ├── ui/             # shadcn/ui components
+│   ├── forms/          # Form-specific components
+│   └── layout/         # Layout components
+├── lib/                # Utility functions
+├── hooks/              # Custom React hooks
+├── types/              # TypeScript type definitions
+├── prisma/             # Database schema and migrations
+└── public/             # Static assets
+```
+
+## Development Patterns
+
+### API Routes
+- Use Next.js App Router API routes (route.ts)
+- Implement proper HTTP methods (GET, POST, PUT, DELETE)
+- Add comprehensive error handling with try-catch
+- Use Zod for request validation
+- Return consistent JSON responses
+- Implement proper status codes
+
+### Database Operations
+- Use Prisma Client for all database operations
+- Implement proper error handling for database queries
+- Use transactions for complex operations
+- Add proper indexes for performance
+- Validate data before database operations
+
+### Authentication & Security
+- Use JWT for authentication with proper expiration
+- Implement middleware for protected routes
+- Validate and sanitize all user inputs
+- Use bcrypt for password hashing
+- Implement rate limiting where appropriate
+- Add CSRF protection
+
+### State Management
+- Use React's built-in state (useState, useReducer) for local state
+- Use React Query/TanStack Query for server state
+- Implement optimistic updates for better UX
+- Use proper loading and error states
+
+### Performance Optimization
+- Implement proper loading states
+- Use React.lazy for code splitting
+- Optimize images with Next.js Image component
+- Implement proper caching strategies
+- Use proper keys for list rendering
+
+## Naming Conventions
+- Files: kebab-case (user-profile.tsx)
+- Components: PascalCase (UserProfile)
+- Functions: camelCase (getUserProfile)
+- Variables: camelCase (userData)
+- Constants: UPPER_SNAKE_CASE (MAX_RETRY_ATTEMPTS)
+- Database: snake_case (user_id, created_at)
+
+## Testing Requirements
+- Write unit tests for utility functions
+- Test complex business logic
+- Use React Testing Library for component tests
+- Mock external dependencies
+- Test error scenarios and edge cases
+
+## Environment Variables
+- Use descriptive names with prefixes (NEXT_PUBLIC_ for client-side)
+- Document all environment variables in .env.example
+- Use different values for development/production
+- Never commit actual .env files
+
+## Git Practices
+- Use conventional commit messages
+- Create feature branches for development
+- Add proper .gitignore for Node.js/Next.js
+- Never commit node_modules, .env, or build files
+
+## Mobile-First Development
+- Design for mobile screens first (375px width)
+- Use touch-friendly interactions (44px minimum touch targets)
+- Implement proper responsive breakpoints
+- Consider offline functionality where appropriate
+- Optimize for performance on mobile devices
+
+## Error Handling
+- Implement comprehensive error boundaries
+- Use proper error messages for user feedback
+- Log errors appropriately (without sensitive data)
+- Provide fallback UI for error states
+- Handle network errors gracefully
+
+## Accessibility
+- Use semantic HTML elements
+- Implement proper ARIA labels
+- Ensure keyboard navigation works
+- Maintain proper color contrast
+- Test with screen readers when possible
+
+## Dependencies Management
+- Keep dependencies up to date
+- Use exact versions for critical dependencies
+- Minimize bundle size
+- Prefer lighter alternatives when possible
+- Document any peer dependencies
+
+## Code Examples
+
+### Good Form Implementation:
+```tsx
+const UserForm = () => {
+  const form = useForm<UserFormData>({
+    resolver: zodResolver(userSchema),
+    defaultValues: { name: "", email: "" }
+  })
+  
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Submit</Button>
+      </form>
+    </Form>
+  )
+}
+```
+
+### Good API Route:
+```tsx
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    const validatedData = createUserSchema.parse(body)
+    
+    const user = await prisma.user.create({
+      data: validatedData
+    })
+    
+    return NextResponse.json(user, { status: 201 })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.errors }, { status: 400 })
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
+```
+
+Remember: Always prioritize security, performance, and user experience. Keep code clean, maintainable, and well-structured.
