@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  reminders    Reminder[]
+  reminderLogs ReminderLog[]
+  counters     Counter[]
+
+  @@map("users")
+}
+
+// Reminder model for wellness reminders
+model Reminder {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  category    String   @default("wellness") // wellness, health, exercise, etc.
+  isActive    Boolean  @default(true)
+  
+  // Timing configuration
+  reminderTime String  // HH:MM format
+  daysOfWeek   String  // JSON array of day numbers (0-6, 0=Sunday)
+  timezone     String  @default("UTC")
+  
+  // Notification settings
+  soundEnabled    Boolean @default(true)
+  soundFile       String? // Path to custom sound file
+  vibrationEnabled Boolean @default(true)
+  
+  // Quiet hours
+  quietHoursEnabled Boolean @default(false)
+  quietHoursStart   String? // HH:MM format
+  quietHoursEnd     String? // HH:MM format
+  
+  // Snooze settings
+  snoozeEnabled  Boolean @default(true)
+  snoozeDuration Int     @default(5) // minutes
+  maxSnoozes     Int     @default(3)
+  
+  // Metadata
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminderLogs ReminderLog[]
+  counters     Counter[]
+
+  @@map("reminders")
+}
+
+// ReminderLog model for tracking user interactions
+model ReminderLog {
+  id         String   @id @default(cuid())
+  action     String   // "completed", "dismissed", "snoozed", "missed"
+  timestamp  DateTime @default(now())
+  snoozeCount Int     @default(0)
+  notes      String?
+  
+  // Additional data (JSON for flexibility)
+  metadata   String? // JSON string for additional data
+  
+  // Foreign keys
+  userId     String
+  reminderId String
+  
+  // Date tracking (for easier querying)
+  date       String  // YYYY-MM-DD format for easy date-based queries
+  
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminder Reminder @relation(fields: [reminderId], references: [id], onDelete: Cascade)
+
+  @@map("reminder_logs")
+  @@index([userId, date])
+  @@index([reminderId, date])
+}
+
+// Counter model for tracking daily activities (water, coffee, etc.)
+model Counter {
+  id            String   @id @default(cuid())
+  name          String   // "Water", "Coffee", "Steps", etc.
+  unit          String   @default("count") // "count", "ml", "steps", etc.
+  iconName      String?  // Lucide icon name
+  color         String   @default("#3b82f6") // Hex color code
+  dailyGoal     Int?     // Optional daily goal
+  currentValue  Int      @default(0)
+  isActive      Boolean  @default(true)
+  
+  // Date tracking
+  date          String   // YYYY-MM-DD format
+  
+  // Reminder association (optional)
+  reminderId    String?
+  
+  // Metadata
+  userId        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminder Reminder? @relation(fields: [reminderId], references: [id], onDelete: SetNull)
+
+  @@map("counters")
+  @@unique([userId, name, date]) // One counter per user per day per name
+  @@index([userId, date])
+}
