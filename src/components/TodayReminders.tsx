@@ -20,6 +20,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { formatReminderTime } from "@/lib/dashboard-utils";
+import { ActionButtonsWithStatus } from "@/components/ActionButtons";
 
 interface ReminderWithStatus {
   id: string;
@@ -69,30 +70,6 @@ export function TodayReminders({ userId }: TodayRemindersProps) {
   useEffect(() => {
     fetchTodayReminders();
   }, [userId]);
-
-  const handleAction = async (reminderId: string, action: string) => {
-    try {
-      const response = await fetch("/api/logs", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          reminderId,
-          action,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to ${action} reminder`);
-      }
-
-      // Refresh the reminders list
-      await fetchTodayReminders();
-    } catch (err) {
-      console.error(`Error ${action} reminder:`, err);
-    }
-  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -248,37 +225,12 @@ export function TodayReminders({ userId }: TodayRemindersProps) {
                     </div>
                   </div>
 
-                  {reminder.status === "pending" && (
-                    <div className="flex gap-2 ml-4">
-                      <Button
-                        size="sm"
-                        onClick={() => handleAction(reminder.id, "completed")}
-                        className="bg-green-400/10 text-green-400 hover:bg-green-400/20 border-green-400/20"
-                        variant="outline"
-                      >
-                        <CheckCircle2 className="h-4 w-4 mr-1" />
-                        Done
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleAction(reminder.id, "dismissed")}
-                        className="bg-red-400/10 text-red-400 hover:bg-red-400/20 border-red-400/20"
-                      >
-                        <XCircle className="h-4 w-4 mr-1" />
-                        Skip
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleAction(reminder.id, "snoozed")}
-                        className="bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/20 border-yellow-400/20"
-                      >
-                        <Timer className="h-4 w-4 mr-1" />
-                        Snooze
-                      </Button>
-                    </div>
-                  )}
+                  <ActionButtonsWithStatus
+                    reminderId={reminder.id}
+                    status={reminder.status}
+                    currentSnoozeCount={reminder.snoozeCount}
+                    onActionComplete={() => fetchTodayReminders()}
+                  />
                 </div>
 
                 {index < reminders.length - 1 && <Separator className="my-4" />}
