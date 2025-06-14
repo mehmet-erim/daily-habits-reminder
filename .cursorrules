@@ -329,3 +329,8 @@ export async function POST(request: Request) {
 ```
 
 Remember: Always prioritize security, performance, and user experience. Keep code clean, maintainable, and well-structured.
+
+## Docs
+
+- Create documents for complex implementations such as authentication
+- Place MD files within /docs folder

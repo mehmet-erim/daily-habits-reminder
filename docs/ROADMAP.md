@@ -50,7 +50,7 @@ A step-by-step development guide for building a Next.js wellness reminder applic
 
 ---
 
-### Step 1.3: Authentication System
+### Step 1.3: Authentication System - DONE
 **Goal**: Implement JWT-based authentication with static user
 
 **Tasks**:
