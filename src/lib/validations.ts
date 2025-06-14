@@ -174,3 +174,152 @@ export const getDayNames = (days: number[]): string[] => {
     return dayObj?.label || "Unknown";
   });
 };
+
+// Counter validation schemas
+export const COUNTER_UNITS = [
+  "count",
+  "ml",
+  "l",
+  "cups",
+  "glasses",
+  "steps",
+  "minutes",
+  "hours",
+  "pages",
+  "calories",
+  "grams",
+  "kg",
+  "lbs",
+  "reps",
+  "sets",
+] as const;
+
+export type CounterUnit = (typeof COUNTER_UNITS)[number];
+
+// Create counter schema
+export const createCounterSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Counter name is required")
+    .max(50, "Counter name must be less than 50 characters")
+    .regex(
+      /^[a-zA-Z0-9\s\-_]+$/,
+      "Counter name can only contain letters, numbers, spaces, hyphens, and underscores"
+    ),
+
+  unit: z
+    .enum(COUNTER_UNITS, {
+      errorMap: () => ({ message: "Please select a valid unit" }),
+    })
+    .default("count"),
+
+  iconName: z
+    .string()
+    .max(50, "Icon name must be less than 50 characters")
+    .optional(),
+
+  color: z
+    .string()
+    .regex(/^#[0-9A-F]{6}$/i, "Color must be a valid hex color code")
+    .default("#3b82f6"),
+
+  dailyGoal: z
+    .number()
+    .min(1, "Daily goal must be at least 1")
+    .max(10000, "Daily goal must be less than 10,000")
+    .optional(),
+
+  reminderId: z.string().optional(),
+});
+
+// Update counter settings schema
+export const updateCounterSettingsSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Counter name is required")
+    .max(50, "Counter name must be less than 50 characters")
+    .regex(
+      /^[a-zA-Z0-9\s\-_]+$/,
+      "Counter name can only contain letters, numbers, spaces, hyphens, and underscores"
+    )
+    .optional(),
+
+  unit: z
+    .enum(COUNTER_UNITS, {
+      errorMap: () => ({ message: "Please select a valid unit" }),
+    })
+    .optional(),
+
+  iconName: z
+    .string()
+    .max(50, "Icon name must be less than 50 characters")
+    .optional(),
+
+  color: z
+    .string()
+    .regex(/^#[0-9A-F]{6}$/i, "Color must be a valid hex color code")
+    .optional(),
+
+  dailyGoal: z
+    .number()
+    .min(1, "Daily goal must be at least 1")
+    .max(10000, "Daily goal must be less than 10,000")
+    .optional(),
+
+  isActive: z.boolean().optional(),
+});
+
+// Counter action schemas
+export const incrementCounterSchema = z.object({
+  amount: z
+    .number()
+    .min(-1000, "Amount must be greater than -1000")
+    .max(1000, "Amount must be less than 1000")
+    .default(1),
+});
+
+export const setCounterValueSchema = z.object({
+  value: z
+    .number()
+    .min(0, "Counter value cannot be negative")
+    .max(100000, "Counter value must be less than 100,000"),
+});
+
+// Counter history query schema
+export const counterHistoryQuerySchema = z.object({
+  name: z.string().min(1, "Counter name is required"),
+  startDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be in YYYY-MM-DD format"),
+  endDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "End date must be in YYYY-MM-DD format"),
+});
+
+// Type exports for counter schemas
+export type CreateCounterFormData = z.infer<typeof createCounterSchema>;
+export type UpdateCounterSettingsFormData = z.infer<
+  typeof updateCounterSettingsSchema
+>;
+export type IncrementCounterData = z.infer<typeof incrementCounterSchema>;
+export type SetCounterValueData = z.infer<typeof setCounterValueSchema>;
+export type CounterHistoryQuery = z.infer<typeof counterHistoryQuerySchema>;
+
+// Counter response schema
+export const counterResponseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  unit: z.string(),
+  iconName: z.string().nullable(),
+  color: z.string(),
+  dailyGoal: z.number().nullable(),
+  currentValue: z.number(),
+  isActive: z.boolean(),
+  date: z.string(),
+  reminderId: z.string().nullable(),
+  userId: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type CounterResponse = z.infer<typeof counterResponseSchema>;

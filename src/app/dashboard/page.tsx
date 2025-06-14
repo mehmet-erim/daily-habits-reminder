@@ -12,6 +12,7 @@ import { LogoutButton } from "@/components/logout-button";
 import { TodayReminders } from "@/components/TodayReminders";
 import { DailyStats } from "@/components/DailyStats";
 import { QuickActions } from "@/components/QuickActions";
+import { CountersSection } from "@/components/CountersSection";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -38,15 +39,21 @@ export default async function DashboardPage() {
           <div className="lg:col-span-2 space-y-6">
             <TodayReminders userId={user.id} />
 
+            {/* Counters Section on Mobile */}
+            <div className="lg:hidden">
+              <CountersSection userId={user.id} />
+            </div>
+
             {/* Stats Row on Mobile, Stats in Right Column on Desktop */}
             <div className="lg:hidden">
               <DailyStats userId={user.id} />
             </div>
           </div>
 
-          {/* Right Column - Stats and Quick Actions (Desktop only) */}
+          {/* Right Column - Stats, Counters, and Quick Actions (Desktop only) */}
           <div className="hidden lg:block space-y-6">
             <DailyStats userId={user.id} />
+            <CountersSection userId={user.id} />
             <QuickActions userId={user.id} />
           </div>
         </div>
@@ -67,7 +74,7 @@ export default async function DashboardPage() {
               Here you can track your daily reminders, monitor your progress,
               and take quick actions to stay on top of your wellness goals.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
               <div className="flex items-start gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-400 mt-2 flex-shrink-0"></div>
                 <div>
@@ -87,6 +94,17 @@ export default async function DashboardPage() {
                   </span>
                   <span className="text-muted-foreground ml-1">
                     Track your completion rate and progress
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="w-2 h-2 rounded-full bg-orange-400 mt-2 flex-shrink-0"></div>
+                <div>
+                  <span className="font-medium text-foreground">
+                    Daily Counters:
+                  </span>
+                  <span className="text-muted-foreground ml-1">
+                    Track water, coffee, steps, and other daily activities
                   </span>
                 </div>
               </div>
