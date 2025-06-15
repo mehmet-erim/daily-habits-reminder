@@ -120,3 +120,193 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Performance-Optimized CSS */
+
+/* Shimmer Loading Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.dark .shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
+  background-size: 200px 100%;
+}
+
+/* Skeleton Loading States */
+.skeleton {
+  @apply animate-pulse bg-muted rounded;
+}
+
+.skeleton-text {
+  @apply h-4 bg-muted rounded;
+}
+
+.skeleton-text-sm {
+  @apply h-3 bg-muted rounded;
+}
+
+.skeleton-text-lg {
+  @apply h-6 bg-muted rounded;
+}
+
+.skeleton-avatar {
+  @apply w-10 h-10 bg-muted rounded-full;
+}
+
+.skeleton-card {
+  @apply bg-card border border-border rounded-lg p-4 space-y-3;
+}
+
+/* GPU Acceleration Classes */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hardware-accelerated {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Optimized Transitions */
+.fast-transition {
+  transition: all 0.15s ease-out;
+}
+
+.medium-transition {
+  transition: all 0.25s ease-out;
+}
+
+.slow-transition {
+  transition: all 0.35s ease-out;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .shimmer {
+    animation: none;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .dark .shimmer {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .skeleton {
+    @apply bg-border;
+  }
+
+  .skeleton-text,
+  .skeleton-text-sm,
+  .skeleton-text-lg {
+    @apply bg-border;
+  }
+}
+
+/* Performance-Optimized Layout Classes */
+.contain-layout {
+  contain: layout;
+}
+
+.contain-paint {
+  contain: paint;
+}
+
+.contain-size {
+  contain: size;
+}
+
+.contain-style {
+  contain: style;
+}
+
+.contain-all {
+  contain: layout style paint size;
+}
+
+/* Optimized Scrolling */
+.optimized-scroll {
+  overflow-scrolling: touch;
+  scroll-snap-type: y mandatory;
+}
+
+.scroll-snap-start {
+  scroll-snap-align: start;
+}
+
+.scroll-snap-center {
+  scroll-snap-align: center;
+}
+
+.scroll-snap-end {
+  scroll-snap-align: end;
+}
+
+/* Loading State Optimizations */
+.loading-container {
+  @apply relative overflow-hidden;
+}
+
+.loading-overlay {
+  @apply absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center;
+}
+
+/* Critical Resource Hints */
+.preload-font {
+  font-display: swap;
+}
+
+/* Memory-Efficient Animations */
+.efficient-fade {
+  transition: opacity 0.2s ease-out;
+}
+
+.efficient-scale {
+  transition: transform 0.2s ease-out;
+  will-change: transform;
+}
+
+.efficient-slide {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
