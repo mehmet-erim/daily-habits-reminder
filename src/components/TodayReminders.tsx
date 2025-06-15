@@ -21,6 +21,10 @@ import {
 } from "lucide-react";
 import { formatReminderTime } from "@/lib/dashboard-utils";
 import { ActionButtonsWithStatus } from "@/components/ActionButtons";
+import { SwipeableReminderCard } from "@/components/mobile/SwipeableCard";
+import { PullToRefresh } from "@/components/mobile/PullToRefresh";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useHapticFeedback } from "@/hooks/useHapticFeedback";
 
 interface ReminderWithStatus {
   id: string;
@@ -41,6 +45,9 @@ export function TodayReminders({ userId }: TodayRemindersProps) {
   const [reminders, setReminders] = useState<ReminderWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const isMobile = useIsMobile();
+  const haptic = useHapticFeedback();
 
   const fetchTodayReminders = async () => {
     try {
@@ -125,6 +132,83 @@ export function TodayReminders({ userId }: TodayRemindersProps) {
     return colors[category] || colors.default;
   };
 
+  // Handle mobile swipe actions
+  const handleSwipeComplete = async (reminderId: string) => {
+    haptic.feedback.success();
+    // Call the API to mark as completed
+    try {
+      const response = await fetch("/api/logs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          reminderId,
+          action: "completed",
+        }),
+      });
+
+      if (response.ok) {
+        await fetchTodayReminders();
+      }
+    } catch (error) {
+      console.error("Failed to complete reminder:", error);
+      haptic.feedback.error();
+    }
+  };
+
+  const handleSwipeDismiss = async (reminderId: string) => {
+    haptic.feedback.swipeDismiss();
+    try {
+      const response = await fetch("/api/logs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          reminderId,
+          action: "dismissed",
+        }),
+      });
+
+      if (response.ok) {
+        await fetchTodayReminders();
+      }
+    } catch (error) {
+      console.error("Failed to dismiss reminder:", error);
+      haptic.feedback.error();
+    }
+  };
+
+  const handleSwipeSnooze = async (reminderId: string) => {
+    haptic.feedback.swipeSnooze();
+    try {
+      const response = await fetch("/api/logs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          reminderId,
+          action: "snoozed",
+        }),
+      });
+
+      if (response.ok) {
+        await fetchTodayReminders();
+      }
+    } catch (error) {
+      console.error("Failed to snooze reminder:", error);
+      haptic.feedback.error();
+    }
+  };
+
+  const handleSwipeEdit = (reminderId: string) => {
+    haptic.feedback.selection();
+    // Navigate to edit page
+    window.location.href = `/reminders/${reminderId}/edit`;
+  };
+
   if (loading) {
     return (
       <Card>
@@ -169,7 +253,7 @@ export function TodayReminders({ userId }: TodayRemindersProps) {
     );
   }
 
-  return (
+  const content = (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
@@ -177,11 +261,16 @@ export function TodayReminders({ userId }: TodayRemindersProps) {
             <Clock className="h-5 w-5 mr-2" />
             Today's Reminders
           </div>
-          <Button onClick={fetchTodayReminders} variant="ghost" size="sm">
-            <RefreshCw className="h-4 w-4" />
-          </Button>
+          {!isMobile && (
+            <Button onClick={fetchTodayReminders} variant="ghost" size="sm">
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          )}
         </CardTitle>
-        <CardDescription>Your wellness reminders for today</CardDescription>
+        <CardDescription>
+          Your wellness reminders for today
+          {isMobile && " - Swipe cards to interact"}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {reminders.length === 0 ? (
@@ -196,9 +285,9 @@ export function TodayReminders({ userId }: TodayRemindersProps) {
           </div>
         ) : (
           <div className="space-y-4">
-            {reminders.map((reminder, index) => (
-              <div key={reminder.id}>
-                <div className="flex items-start justify-between p-4 rounded-lg border border-border bg-card/50">
+            {reminders.map((reminder, index) => {
+              const reminderContent = (
+                <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       {getStatusIcon(reminder.status)}
@@ -225,20 +314,60 @@ export function TodayReminders({ userId }: TodayRemindersProps) {
                     </div>
                   </div>
 
-                  <ActionButtonsWithStatus
-                    reminderId={reminder.id}
-                    status={reminder.status}
-                    currentSnoozeCount={reminder.snoozeCount}
-                    onActionComplete={() => fetchTodayReminders()}
-                  />
+                  {!isMobile && (
+                    <ActionButtonsWithStatus
+                      reminderId={reminder.id}
+                      status={reminder.status}
+                      currentSnoozeCount={reminder.snoozeCount}
+                      onActionComplete={() => fetchTodayReminders()}
+                    />
+                  )}
                 </div>
+              );
 
-                {index < reminders.length - 1 && <Separator className="my-4" />}
-              </div>
-            ))}
+              return (
+                <div key={reminder.id}>
+                  {isMobile && reminder.status === "pending" ? (
+                    <SwipeableReminderCard
+                      reminderId={reminder.id}
+                      onComplete={handleSwipeComplete}
+                      onDismiss={handleSwipeDismiss}
+                      onSnooze={handleSwipeSnooze}
+                      onEdit={handleSwipeEdit}
+                      className="mb-4"
+                    >
+                      {reminderContent}
+                    </SwipeableReminderCard>
+                  ) : (
+                    <div className="p-4 rounded-lg border border-border bg-card/50">
+                      {reminderContent}
+                    </div>
+                  )}
+
+                  {index < reminders.length - 1 && (
+                    <Separator className="my-4" />
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </CardContent>
     </Card>
   );
+
+  // Wrap with pull-to-refresh on mobile
+  if (isMobile) {
+    return (
+      <PullToRefresh
+        onRefresh={fetchTodayReminders}
+        disabled={loading}
+        className="h-full"
+      >
+        {content}
+      </PullToRefresh>
+    );
+  }
+
+  return content;
 }
