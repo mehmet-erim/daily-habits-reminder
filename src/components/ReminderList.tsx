@@ -48,6 +48,7 @@ import {
   MoreVertical,
   Power,
   PowerOff,
+  Timer,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -82,6 +83,10 @@ interface Reminder {
   quietHoursEnabled: boolean;
   quietHoursStart: string | null;
   quietHoursEnd: string | null;
+  isRecurring: boolean;
+  recurringInterval: number | null;
+  recurringStartTime: string | null;
+  recurringEndTime: string | null;
   snoozeEnabled: boolean;
   snoozeDuration: number;
   maxSnoozes: number;
@@ -470,7 +475,13 @@ export default function ReminderList({ onEdit }: ReminderListProps) {
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 flex-shrink-0" />
                       <span className="break-words">
-                        {formatTime(reminder.reminderTime)}
+                        {reminder.isRecurring &&
+                        reminder.recurringStartTime &&
+                        reminder.recurringEndTime
+                          ? `${formatTime(
+                              reminder.recurringStartTime
+                            )} - ${formatTime(reminder.recurringEndTime)}`
+                          : formatTime(reminder.reminderTime)}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -482,6 +493,26 @@ export default function ReminderList({ onEdit }: ReminderListProps) {
                       </span>
                     </div>
                   </div>
+
+                  {/* Recurring Info */}
+                  {reminder.isRecurring && reminder.recurringInterval && (
+                    <div className="bg-blue-400/10 border border-blue-400/20 rounded-lg p-3">
+                      <div className="flex items-center gap-2 text-blue-400 text-sm font-medium">
+                        <Timer className="w-4 h-4" />
+                        <span>Recurring Notifications</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Every {reminder.recurringInterval} minutes from{" "}
+                        {reminder.recurringStartTime &&
+                          formatTime(reminder.recurringStartTime)}{" "}
+                        to{" "}
+                        {reminder.recurringEndTime &&
+                          formatTime(reminder.recurringEndTime)}
+                        {reminder.quietHoursEnabled &&
+                          " (respects quiet hours)"}
+                      </p>
+                    </div>
+                  )}
 
                   <Separator />
 
@@ -500,6 +531,13 @@ export default function ReminderList({ onEdit }: ReminderListProps) {
                       <div className="flex items-center gap-1">
                         <Moon className="w-3 h-3" />
                         <span>Quiet Hours</span>
+                      </div>
+                    )}
+
+                    {reminder.isRecurring && reminder.recurringInterval && (
+                      <div className="flex items-center gap-1">
+                        <Timer className="w-3 h-3" />
+                        <span>Every {reminder.recurringInterval}m</span>
                       </div>
                     )}
 

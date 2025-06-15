@@ -39,14 +39,6 @@ async function main() {
       daysOfWeek: JSON.stringify([1, 2, 3, 4, 5, 6, 7]), // Every day
       userId: user.id,
     },
-    {
-      title: "Evening Meditation",
-      description: "Practice mindfulness for 5 minutes",
-      category: "wellness",
-      reminderTime: "19:00",
-      daysOfWeek: JSON.stringify([1, 2, 3, 4, 5, 6, 7]), // Every day
-      userId: user.id,
-    },
   ];
 
   for (const reminder of reminders) {

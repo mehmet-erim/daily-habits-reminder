@@ -44,6 +44,7 @@ import {
   UpdateReminderFormData,
   REMINDER_CATEGORIES,
   DAYS_OF_WEEK,
+  RECURRING_INTERVALS,
   parseDaysOfWeek,
 } from "@/lib/validations";
 import { toast } from "sonner";
@@ -89,6 +90,11 @@ export default function ReminderForm({
             quietHoursEnabled: reminder.quietHoursEnabled,
             quietHoursStart: reminder.quietHoursStart || "",
             quietHoursEnd: reminder.quietHoursEnd || "",
+            isRecurring: reminder.isRecurring || false,
+            recurringInterval: reminder.recurringInterval || 30,
+            recurringStartTime:
+              reminder.recurringStartTime || reminder.reminderTime,
+            recurringEndTime: reminder.recurringEndTime || "",
             snoozeEnabled: reminder.snoozeEnabled,
             snoozeDuration: reminder.snoozeDuration,
             maxSnoozes: reminder.maxSnoozes,
@@ -107,6 +113,10 @@ export default function ReminderForm({
             quietHoursEnabled: false,
             quietHoursStart: "22:00",
             quietHoursEnd: "07:00",
+            isRecurring: false,
+            recurringInterval: 30,
+            recurringStartTime: "09:00",
+            recurringEndTime: "17:00",
             snoozeEnabled: true,
             snoozeDuration: 5,
             maxSnoozes: 3,
@@ -115,6 +125,7 @@ export default function ReminderForm({
 
   const watchQuietHours = form.watch("quietHoursEnabled");
   const watchDaysOfWeek = form.watch("daysOfWeek");
+  const watchIsRecurring = form.watch("isRecurring");
 
   const handleSubmit = async (
     data: CreateReminderFormData | UpdateReminderFormData
@@ -358,6 +369,126 @@ export default function ReminderForm({
                       {(watchDaysOfWeek?.length || 0) !== 1 ? "s" : ""} selected
                     </Badge>
                   </div>
+                </div>
+
+                <Separator />
+
+                {/* Recurring Notifications Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="isRecurring"
+                      checked={watchIsRecurring}
+                      onCheckedChange={(checked) =>
+                        form.setValue("isRecurring", checked)
+                      }
+                    />
+                    <Label
+                      htmlFor="isRecurring"
+                      className="flex items-center gap-2"
+                    >
+                      <Repeat className="h-4 w-4" />
+                      Recurring Notifications
+                    </Label>
+                  </div>
+
+                  {watchIsRecurring && (
+                    <div className="grid gap-4 ml-6 p-4 bg-muted/20 rounded-lg border">
+                      <div className="text-sm text-muted-foreground">
+                        Send notifications repeatedly throughout the day at
+                        regular intervals. Perfect for exercises, hydration
+                        reminders, or posture checks.
+                      </div>
+
+                      <div>
+                        <Label htmlFor="recurringInterval">
+                          Notification Interval
+                        </Label>
+                        <Select
+                          value={form.watch("recurringInterval")?.toString()}
+                          onValueChange={(value) =>
+                            form.setValue("recurringInterval", parseInt(value))
+                          }
+                        >
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="Select interval" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {RECURRING_INTERVALS.map((interval) => (
+                              <SelectItem
+                                key={interval.value}
+                                value={interval.value.toString()}
+                              >
+                                {interval.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {form.formState.errors.recurringInterval && (
+                          <p className="text-sm text-destructive mt-1">
+                            {form.formState.errors.recurringInterval.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="recurringStartTime">Start Time</Label>
+                          <Input
+                            id="recurringStartTime"
+                            type="time"
+                            {...form.register("recurringStartTime")}
+                            className="mt-1"
+                          />
+                          {form.formState.errors.recurringStartTime && (
+                            <p className="text-sm text-destructive mt-1">
+                              {form.formState.errors.recurringStartTime.message}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            When to start recurring notifications
+                          </p>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="recurringEndTime">End Time *</Label>
+                          <Input
+                            id="recurringEndTime"
+                            type="time"
+                            {...form.register("recurringEndTime")}
+                            className="mt-1"
+                          />
+                          {form.formState.errors.recurringEndTime && (
+                            <p className="text-sm text-destructive mt-1">
+                              {form.formState.errors.recurringEndTime.message}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            When to stop recurring notifications
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Preview section */}
+                      {watchIsRecurring &&
+                        form.watch("recurringInterval") &&
+                        form.watch("recurringStartTime") &&
+                        form.watch("recurringEndTime") && (
+                          <div className="bg-card border rounded-lg p-3">
+                            <p className="text-sm font-medium text-foreground mb-2">
+                              📅 Recurring Schedule Preview:
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Notifications every{" "}
+                              {form.watch("recurringInterval")} minutes from{" "}
+                              {form.watch("recurringStartTime")} to{" "}
+                              {form.watch("recurringEndTime")}
+                              {watchQuietHours && " (respecting quiet hours)"}
+                            </p>
+                          </div>
+                        )}
+                    </div>
+                  )}
                 </div>
               </div>
             </TabsContent>

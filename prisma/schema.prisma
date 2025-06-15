@@ -41,6 +41,12 @@ model Reminder {
   daysOfWeek   String  // JSON array of day numbers (0-6, 0=Sunday)
   timezone     String  @default("UTC")
   
+  // Recurring notification settings
+  isRecurring         Boolean @default(false) // Enable recurring notifications
+  recurringInterval   Int?    // Interval in minutes (e.g., 30, 60, 120)
+  recurringEndTime    String? // HH:MM format - when to stop recurring for the day
+  recurringStartTime  String? // HH:MM format - when to start recurring for the day (defaults to reminderTime)
+  
   // Notification settings
   soundEnabled    Boolean @default(true)
   soundFile       String? // Path to custom sound file

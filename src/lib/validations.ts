@@ -17,6 +17,18 @@ export const REMINDER_CATEGORIES = [
 
 export type ReminderCategory = (typeof REMINDER_CATEGORIES)[number];
 
+// Recurring interval options (in minutes)
+export const RECURRING_INTERVALS = [
+  { value: 15, label: "Every 15 minutes" },
+  { value: 30, label: "Every 30 minutes" },
+  { value: 45, label: "Every 45 minutes" },
+  { value: 60, label: "Every hour" },
+  { value: 90, label: "Every 1.5 hours" },
+  { value: 120, label: "Every 2 hours" },
+  { value: 180, label: "Every 3 hours" },
+  { value: 240, label: "Every 4 hours" },
+] as const;
+
 // Days of week (0=Sunday, 1=Monday, etc.)
 export const DAYS_OF_WEEK = [
   { value: 0, label: "Sunday" },
@@ -30,6 +42,12 @@ export const DAYS_OF_WEEK = [
 
 // Time validation helper (HH:MM format)
 const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+
+// Helper function to convert HH:MM to minutes since midnight
+const convertTimeToMinutes = (time: string): number => {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+};
 
 // Base reminder schema (without refinements for reusability)
 const baseReminderSchema = z.object({
@@ -78,6 +96,25 @@ const baseReminderSchema = z.object({
     .regex(timeRegex, "Quiet hours end time must be in HH:MM format")
     .optional(),
 
+  // Recurring notification settings
+  isRecurring: z.boolean().default(false),
+
+  recurringInterval: z
+    .number()
+    .min(5, "Recurring interval must be at least 5 minutes")
+    .max(480, "Recurring interval must be less than 8 hours (480 minutes)")
+    .optional(),
+
+  recurringStartTime: z
+    .string()
+    .regex(timeRegex, "Recurring start time must be in HH:MM format")
+    .optional(),
+
+  recurringEndTime: z
+    .string()
+    .regex(timeRegex, "Recurring end time must be in HH:MM format")
+    .optional(),
+
   // Snooze settings
   snoozeEnabled: z.boolean().default(true),
 
@@ -95,34 +132,101 @@ const baseReminderSchema = z.object({
 });
 
 // Create reminder schema with refinements
-export const createReminderSchema = baseReminderSchema.refine(
-  (data) => {
-    if (data.quietHoursEnabled) {
-      return data.quietHoursStart && data.quietHoursEnd;
+export const createReminderSchema = baseReminderSchema
+  .refine(
+    (data) => {
+      if (data.quietHoursEnabled) {
+        return data.quietHoursStart && data.quietHoursEnd;
+      }
+      return true;
+    },
+    {
+      message:
+        "Quiet hours start and end times are required when quiet hours are enabled",
+      path: ["quietHoursStart"],
     }
-    return true;
-  },
-  {
-    message:
-      "Quiet hours start and end times are required when quiet hours are enabled",
-    path: ["quietHoursStart"],
-  }
-);
+  )
+  .refine(
+    (data) => {
+      if (data.isRecurring) {
+        return data.recurringInterval && data.recurringEndTime;
+      }
+      return true;
+    },
+    {
+      message:
+        "Recurring interval and end time are required when recurring notifications are enabled",
+      path: ["recurringInterval"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (
+        data.isRecurring &&
+        data.recurringStartTime &&
+        data.recurringEndTime
+      ) {
+        // Check that start time is before end time
+        const startMinutes = convertTimeToMinutes(data.recurringStartTime);
+        const endMinutes = convertTimeToMinutes(data.recurringEndTime);
+        return startMinutes < endMinutes;
+      }
+      return true;
+    },
+    {
+      message: "Recurring start time must be before end time",
+      path: ["recurringStartTime"],
+    }
+  );
 
 // Update reminder schema (makes fields optional for partial updates)
-export const updateReminderSchema = baseReminderSchema.partial().refine(
-  (data) => {
-    if (data.quietHoursEnabled) {
-      return data.quietHoursStart && data.quietHoursEnd;
+export const updateReminderSchema = baseReminderSchema
+  .partial()
+  .refine(
+    (data) => {
+      if (data.quietHoursEnabled) {
+        return data.quietHoursStart && data.quietHoursEnd;
+      }
+      return true;
+    },
+    {
+      message:
+        "Quiet hours start and end times are required when quiet hours are enabled",
+      path: ["quietHoursStart"],
     }
-    return true;
-  },
-  {
-    message:
-      "Quiet hours start and end times are required when quiet hours are enabled",
-    path: ["quietHoursStart"],
-  }
-);
+  )
+  .refine(
+    (data) => {
+      if (data.isRecurring) {
+        return data.recurringInterval && data.recurringEndTime;
+      }
+      return true;
+    },
+    {
+      message:
+        "Recurring interval and end time are required when recurring notifications are enabled",
+      path: ["recurringInterval"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (
+        data.isRecurring &&
+        data.recurringStartTime &&
+        data.recurringEndTime
+      ) {
+        // Check that start time is before end time
+        const startMinutes = convertTimeToMinutes(data.recurringStartTime);
+        const endMinutes = convertTimeToMinutes(data.recurringEndTime);
+        return startMinutes < endMinutes;
+      }
+      return true;
+    },
+    {
+      message: "Recurring start time must be before end time",
+      path: ["recurringStartTime"],
+    }
+  );
 
 // Form data type for React Hook Form
 export type CreateReminderFormData = z.infer<typeof createReminderSchema>;
@@ -144,6 +248,10 @@ export const reminderResponseSchema = z.object({
   quietHoursEnabled: z.boolean(),
   quietHoursStart: z.string().nullable(),
   quietHoursEnd: z.string().nullable(),
+  isRecurring: z.boolean(),
+  recurringInterval: z.number().nullable(),
+  recurringStartTime: z.string().nullable(),
+  recurringEndTime: z.string().nullable(),
   snoozeEnabled: z.boolean(),
   snoozeDuration: z.number(),
   maxSnoozes: z.number(),

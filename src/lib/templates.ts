@@ -53,26 +53,6 @@ export const WELLNESS_TEMPLATES: ReminderTemplate[] = [
     tags: ["health", "medication", "morning"],
   },
   {
-    id: "evening-meditation",
-    name: "Evening Meditation",
-    description: "Wind down with evening meditation",
-    category: "meditation",
-    icon: "🧘",
-    template: {
-      title: "Evening Meditation",
-      description: "Take 10 minutes to meditate and relax",
-      category: "meditation",
-      reminderTime: "20:00",
-      daysOfWeek: [1, 2, 3, 4, 5, 6, 0], // All days
-      soundEnabled: true,
-      vibrationEnabled: false,
-      snoozeEnabled: true,
-      snoozeDuration: 15,
-      maxSnoozes: 1,
-    },
-    tags: ["wellness", "meditation", "evening", "relaxation"],
-  },
-  {
     id: "workout-reminder",
     name: "Workout Time",
     description: "Daily exercise reminder",
