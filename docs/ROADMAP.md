@@ -99,7 +99,7 @@ A step-by-step development guide for building a Next.js wellness reminder applic
 
 ---
 
-### Step 2.2: Dashboard & Today's View
+### Step 2.2: Dashboard & Today's View - DONE
 **Goal**: Create main dashboard showing today's reminders and stats
 
 **Tasks**:
@@ -121,7 +121,7 @@ A step-by-step development guide for building a Next.js wellness reminder applic
 
 ---
 
-### Step 2.3: Basic Notification System
+### Step 2.3: Basic Notification System - DONE
 **Goal**: Implement browser notifications for reminders
 
 **Tasks**:
@@ -145,7 +145,7 @@ A step-by-step development guide for building a Next.js wellness reminder applic
 
 ## 📊 Phase 3: Data Tracking & Logging
 
-### Step 3.1: Reminder Logging System
+### Step 3.1: Reminder Logging System - DONE
 **Goal**: Track reminder completions, dismissals, and snoozes
 
 **Tasks**:
@@ -167,7 +167,7 @@ A step-by-step development guide for building a Next.js wellness reminder applic
 
 ---
 
-### Step 3.2: Counter System
+### Step 3.2: Counter System - DONE
 **Goal**: Implement daily counters for activities like coffee, water
 
 **Tasks**:
@@ -189,7 +189,7 @@ A step-by-step development guide for building a Next.js wellness reminder applic
 
 ---
 
-### Step 3.3: Historical Data View
+### Step 3.3: Historical Data View - DONE
 **Goal**: Display past days' data and completion history
 
 **Tasks**:
