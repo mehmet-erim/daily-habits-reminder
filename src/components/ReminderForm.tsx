@@ -27,7 +27,16 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Bell, Volume2, Moon, Repeat, Save, X } from "lucide-react";
+import {
+  Clock,
+  Bell,
+  Volume2,
+  Moon,
+  Repeat,
+  Save,
+  X,
+  Sparkles,
+} from "lucide-react";
 import {
   createReminderSchema,
   updateReminderSchema,
@@ -38,6 +47,7 @@ import {
   parseDaysOfWeek,
 } from "@/lib/validations";
 import { toast } from "sonner";
+import ReminderTemplates from "./ReminderTemplates";
 
 interface ReminderFormProps {
   mode: "create" | "edit";
@@ -54,6 +64,7 @@ export default function ReminderForm({
 }: ReminderFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
 
   // Determine which schema to use based on mode
   const schema =
@@ -158,6 +169,19 @@ export default function ReminderForm({
     }
   };
 
+  const handleTemplateSelect = (
+    templateData: CreateReminderFormData | UpdateReminderFormData
+  ) => {
+    // Apply template data to form
+    Object.entries(templateData).forEach(([key, value]) => {
+      if (value !== undefined) {
+        form.setValue(key as any, value as any);
+      }
+    });
+    setShowTemplates(false);
+    toast.success("Template applied successfully!");
+  };
+
   return (
     <Card className="max-w-4xl mx-auto">
       <CardHeader>
@@ -170,6 +194,21 @@ export default function ReminderForm({
             ? "Set up a new wellness reminder to help maintain healthy habits."
             : "Update your reminder settings and preferences."}
         </CardDescription>
+
+        {mode === "create" && (
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowTemplates(true)}
+              className="flex items-center gap-2"
+            >
+              <Sparkles className="h-4 w-4" />
+              Use Template
+            </Button>
+          </div>
+        )}
       </CardHeader>
 
       <CardContent>
@@ -494,6 +533,18 @@ export default function ReminderForm({
           </div>
         </form>
       </CardContent>
+
+      {/* Template Selection Dialog */}
+      {showTemplates && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="max-w-7xl w-full max-h-[90vh] overflow-hidden">
+            <ReminderTemplates
+              onSelectTemplate={handleTemplateSelect}
+              onClose={() => setShowTemplates(false)}
+            />
+          </div>
+        </div>
+      )}
     </Card>
   );
 }

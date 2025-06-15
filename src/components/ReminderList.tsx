@@ -63,6 +63,8 @@ import {
   getDayNames,
 } from "@/lib/validations";
 import { toast } from "sonner";
+import BulkOperations from "./BulkOperations";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Reminder {
   id: string;
@@ -99,6 +101,7 @@ export default function ReminderList({ onEdit }: ReminderListProps) {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [activeFilter, setActiveFilter] = useState("all");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedReminders, setSelectedReminders] = useState<string[]>([]);
 
   // Fetch reminders
   const fetchReminders = async () => {
@@ -122,12 +125,30 @@ export default function ReminderList({ onEdit }: ReminderListProps) {
 
       const data = await response.json();
       setReminders(data.reminders || []);
+      setSelectedReminders([]); // Clear selections when data refreshes
     } catch (error) {
       console.error("Error fetching reminders:", error);
       toast.error("Failed to fetch reminders");
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle individual reminder selection
+  const handleReminderSelect = (reminderId: string, checked: boolean) => {
+    setSelectedReminders((prev) =>
+      checked ? [...prev, reminderId] : prev.filter((id) => id !== reminderId)
+    );
+  };
+
+  // Handle bulk operation completion
+  const handleBulkOperationComplete = () => {
+    fetchReminders(); // Refresh the list
+  };
+
+  // Clear all selections
+  const handleClearSelection = () => {
+    setSelectedReminders([]);
   };
 
   useEffect(() => {
@@ -265,6 +286,15 @@ export default function ReminderList({ onEdit }: ReminderListProps) {
         </CardHeader>
       </Card>
 
+      {/* Bulk Operations */}
+      <BulkOperations
+        selectedReminders={selectedReminders}
+        allReminders={filteredReminders}
+        onSelectionChange={setSelectedReminders}
+        onOperationComplete={handleBulkOperationComplete}
+        onClearSelection={handleClearSelection}
+      />
+
       {/* Reminders List */}
       <div className="grid gap-4">
         {loading ? (
@@ -300,28 +330,42 @@ export default function ReminderList({ onEdit }: ReminderListProps) {
             <Card key={reminder.id} className="relative">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <CardTitle className="text-lg text-foreground">
-                        {reminder.title}
-                      </CardTitle>
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant={reminder.isActive ? "default" : "secondary"}
-                          className="text-xs"
-                        >
-                          {reminder.isActive ? "Active" : "Inactive"}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs capitalize">
-                          {reminder.category}
-                        </Badge>
+                  <div className="flex items-start gap-3 flex-1">
+                    <Checkbox
+                      checked={selectedReminders.includes(reminder.id)}
+                      onCheckedChange={(checked) =>
+                        handleReminderSelect(reminder.id, checked as boolean)
+                      }
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <CardTitle className="text-lg text-foreground">
+                          {reminder.title}
+                        </CardTitle>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant={
+                              reminder.isActive ? "default" : "secondary"
+                            }
+                            className="text-xs"
+                          >
+                            {reminder.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                          <Badge
+                            variant="outline"
+                            className="text-xs capitalize"
+                          >
+                            {reminder.category}
+                          </Badge>
+                        </div>
                       </div>
+                      {reminder.description && (
+                        <CardDescription className="text-sm">
+                          {reminder.description}
+                        </CardDescription>
+                      )}
                     </div>
-                    {reminder.description && (
-                      <CardDescription className="text-sm">
-                        {reminder.description}
-                      </CardDescription>
-                    )}
                   </div>
 
                   {/* Actions Dropdown */}
