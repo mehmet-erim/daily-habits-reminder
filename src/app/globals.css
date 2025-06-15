@@ -119,6 +119,63 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Mobile-specific overrides */
+  @media (max-width: 640px) {
+    * {
+      /* Prevent horizontal overflow on mobile */
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Ensure containers don't overflow */
+    .container {
+      @apply px-4;
+    }
+
+    /* Better text handling on mobile */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply break-words leading-tight;
+    }
+
+    p,
+    span,
+    div {
+      @apply break-words;
+    }
+
+    /* Ensure inputs don't overflow */
+    input,
+    textarea,
+    select {
+      @apply w-full min-w-0;
+    }
+
+    /* Better button sizing on mobile */
+    button {
+      @apply min-h-[44px] touch-manipulation;
+    }
+
+    /* Ensure cards don't overflow */
+    [data-radix-card],
+    .card {
+      @apply overflow-hidden;
+    }
+
+    /* Better spacing for mobile */
+    .space-y-6 > * + * {
+      @apply mt-4;
+    }
+
+    .space-y-8 > * + * {
+      @apply mt-6;
+    }
+  }
 }
 
 /* Performance-Optimized CSS */

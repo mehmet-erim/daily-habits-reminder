@@ -65,6 +65,7 @@ import {
 import { toast } from "sonner";
 import BulkOperations from "./BulkOperations";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Reminder {
   id: string;
@@ -95,6 +96,7 @@ interface ReminderListProps {
 
 export default function ReminderList({ onEdit }: ReminderListProps) {
   const router = useRouter();
+  const isMobile = useIsMobile();
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -225,63 +227,73 @@ export default function ReminderList({ onEdit }: ReminderListProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Reminders</h1>
-          <p className="text-muted-foreground">
-            Manage your wellness reminders and habits
-          </p>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate">
+              Reminders
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Manage your wellness reminders and habits
+            </p>
+          </div>
+          <Button
+            onClick={() => router.push("/reminders/new")}
+            className="w-full sm:w-auto"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Reminder
+          </Button>
         </div>
-        <Button onClick={() => router.push("/reminders/new")}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Reminder
-        </Button>
       </div>
 
       {/* Filters and Search */}
       <Card>
         <CardHeader className="pb-4">
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="space-y-4">
             {/* Search */}
-            <div className="relative flex-1">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder="Search reminders..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 w-full"
               />
             </div>
 
-            {/* Category Filter */}
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full sm:w-48">
-                <Filter className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {REMINDER_CATEGORIES.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    <span className="capitalize">{category}</span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Filters Row */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              {/* Category Filter */}
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-full sm:flex-1">
+                  <Filter className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {REMINDER_CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      <span className="capitalize">{category}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            {/* Active Filter */}
-            <Select value={activeFilter} onValueChange={setActiveFilter}>
-              <SelectTrigger className="w-full sm:w-32">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="true">Active</SelectItem>
-                <SelectItem value="false">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
+              {/* Active Filter */}
+              <Select value={activeFilter} onValueChange={setActiveFilter}>
+                <SelectTrigger className="w-full sm:w-32">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="true">Active</SelectItem>
+                  <SelectItem value="false">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardHeader>
       </Card>
@@ -296,7 +308,7 @@ export default function ReminderList({ onEdit }: ReminderListProps) {
       />
 
       {/* Reminders List */}
-      <div className="grid gap-4">
+      <div className="space-y-4">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -308,7 +320,7 @@ export default function ReminderList({ onEdit }: ReminderListProps) {
               <h3 className="text-lg font-semibold text-foreground mb-2">
                 No reminders found
               </h3>
-              <p className="text-muted-foreground text-center mb-4">
+              <p className="text-muted-foreground text-center mb-4 max-w-md">
                 {searchTerm ||
                 categoryFilter !== "all" ||
                 activeFilter !== "all"
@@ -327,132 +339,143 @@ export default function ReminderList({ onEdit }: ReminderListProps) {
           </Card>
         ) : (
           filteredReminders.map((reminder) => (
-            <Card key={reminder.id} className="relative">
+            <Card key={reminder.id} className="relative overflow-hidden">
               <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3 flex-1">
-                    <Checkbox
-                      checked={selectedReminders.includes(reminder.id)}
-                      onCheckedChange={(checked) =>
-                        handleReminderSelect(reminder.id, checked as boolean)
-                      }
-                      className="mt-1"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <CardTitle className="text-lg text-foreground">
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    checked={selectedReminders.includes(reminder.id)}
+                    onCheckedChange={(checked) =>
+                      handleReminderSelect(reminder.id, checked as boolean)
+                    }
+                    className="mt-1 flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    {/* Title and Actions Row */}
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg text-foreground break-words leading-tight">
                           {reminder.title}
                         </CardTitle>
-                        <div className="flex items-center gap-2">
-                          <Badge
-                            variant={
-                              reminder.isActive ? "default" : "secondary"
-                            }
-                            className="text-xs"
-                          >
-                            {reminder.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                          <Badge
-                            variant="outline"
-                            className="text-xs capitalize"
-                          >
-                            {reminder.category}
-                          </Badge>
-                        </div>
                       </div>
-                      {reminder.description && (
-                        <CardDescription className="text-sm">
-                          {reminder.description}
-                        </CardDescription>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions Dropdown */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          onEdit
-                            ? onEdit(reminder)
-                            : router.push(`/reminders/${reminder.id}/edit`)
-                        }
-                      >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          toggleReminderStatus(reminder.id, reminder.isActive)
-                        }
-                      >
-                        {reminder.isActive ? (
-                          <>
-                            <PowerOff className="w-4 h-4 mr-2" />
-                            Deactivate
-                          </>
-                        ) : (
-                          <>
-                            <Power className="w-4 h-4 mr-2" />
-                            Activate
-                          </>
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onSelect={(e) => e.preventDefault()}
+                      {/* Actions Dropdown */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="flex-shrink-0"
                           >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              onEdit
+                                ? onEdit(reminder)
+                                : router.push(`/reminders/${reminder.id}/edit`)
+                            }
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
                           </DropdownMenuItem>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Reminder</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete "{reminder.title}
-                              "? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => deleteReminder(reminder.id)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              disabled={deletingId === reminder.id}
-                            >
-                              {deletingId === reminder.id
-                                ? "Deleting..."
-                                : "Delete"}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              toggleReminderStatus(
+                                reminder.id,
+                                reminder.isActive
+                              )
+                            }
+                          >
+                            {reminder.isActive ? (
+                              <>
+                                <PowerOff className="w-4 h-4 mr-2" />
+                                Deactivate
+                              </>
+                            ) : (
+                              <>
+                                <Power className="w-4 h-4 mr-2" />
+                                Activate
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onSelect={(e) => e.preventDefault()}
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Delete Reminder
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "
+                                  {reminder.title}
+                                  "? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => deleteReminder(reminder.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  disabled={deletingId === reminder.id}
+                                >
+                                  {deletingId === reminder.id
+                                    ? "Deleting..."
+                                    : "Delete"}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    {/* Badges */}
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <Badge
+                        variant={reminder.isActive ? "default" : "secondary"}
+                        className="text-xs"
+                      >
+                        {reminder.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {reminder.category}
+                      </Badge>
+                    </div>
+
+                    {/* Description */}
+                    {reminder.description && (
+                      <CardDescription className="text-sm break-words">
+                        {reminder.description}
+                      </CardDescription>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
 
               <CardContent className="pt-0">
-                <div className="grid gap-3">
+                <div className="space-y-3">
                   {/* Schedule Info */}
-                  <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      <span>{formatTime(reminder.reminderTime)}</span>
+                      <Clock className="w-4 h-4 flex-shrink-0" />
+                      <span className="break-words">
+                        {formatTime(reminder.reminderTime)}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>
+                      <Calendar className="w-4 h-4 flex-shrink-0" />
+                      <span className="break-words">
                         {getDayNames(parseDaysOfWeek(reminder.daysOfWeek)).join(
                           ", "
                         )}
@@ -463,7 +486,7 @@ export default function ReminderList({ onEdit }: ReminderListProps) {
                   <Separator />
 
                   {/* Settings Icons */}
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
                       {reminder.soundEnabled ? (
                         <Volume2 className="w-3 h-3" />

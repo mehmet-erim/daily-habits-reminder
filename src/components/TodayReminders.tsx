@@ -254,23 +254,29 @@ export function TodayReminders({ userId }: TodayRemindersProps) {
   }
 
   const content = (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Clock className="h-5 w-5 mr-2" />
-            Today's Reminders
+    <Card className="overflow-hidden">
+      <CardHeader className="pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Clock className="h-5 w-5 flex-shrink-0" />
+              <span className="truncate">Today's Reminders</span>
+            </CardTitle>
+            <CardDescription className="text-sm">
+              Your wellness reminders for today
+              {isMobile ? " - Swipe cards to interact" : ""}
+            </CardDescription>
           </div>
-          {!isMobile && (
-            <Button onClick={fetchTodayReminders} variant="ghost" size="sm">
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-          )}
-        </CardTitle>
-        <CardDescription>
-          Your wellness reminders for today
-          {isMobile && " - Swipe cards to interact"}
-        </CardDescription>
+          <Button
+            onClick={fetchTodayReminders}
+            variant="outline"
+            size="sm"
+            className="w-full sm:w-auto flex-shrink-0"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {reminders.length === 0 ? (
@@ -287,40 +293,63 @@ export function TodayReminders({ userId }: TodayRemindersProps) {
           <div className="space-y-4">
             {reminders.map((reminder, index) => {
               const reminderContent = (
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      {getStatusIcon(reminder.status)}
-                      <h4 className="font-medium text-foreground">
-                        {reminder.title}
-                      </h4>
-                      {getStatusBadge(reminder.status, reminder.snoozeCount)}
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        {getStatusIcon(reminder.status)}
+                        <h4 className="font-medium text-foreground break-words flex-1 min-w-0">
+                          {reminder.title}
+                        </h4>
+                        {getStatusBadge(reminder.status, reminder.snoozeCount)}
+                      </div>
+
+                      {reminder.description && (
+                        <p className="text-sm text-muted-foreground mb-2 break-words">
+                          {reminder.description}
+                        </p>
+                      )}
+
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3 flex-shrink-0" />
+                          <span className="break-words">
+                            {formatReminderTime(reminder.reminderTime)}
+                          </span>
+                        </span>
+                        <span
+                          className={`${getCategoryColor(
+                            reminder.category
+                          )} capitalize`}
+                        >
+                          {reminder.category}
+                        </span>
+                      </div>
                     </div>
 
-                    {reminder.description && (
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {reminder.description}
-                      </p>
+                    {!isMobile && (
+                      <div className="flex-shrink-0">
+                        <ActionButtonsWithStatus
+                          reminderId={reminder.id}
+                          status={reminder.status}
+                          currentSnoozeCount={reminder.snoozeCount}
+                          onActionComplete={() => fetchTodayReminders()}
+                        />
+                      </div>
                     )}
-
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {formatReminderTime(reminder.reminderTime)}
-                      </span>
-                      <span className={getCategoryColor(reminder.category)}>
-                        {reminder.category}
-                      </span>
-                    </div>
                   </div>
 
-                  {!isMobile && (
-                    <ActionButtonsWithStatus
-                      reminderId={reminder.id}
-                      status={reminder.status}
-                      currentSnoozeCount={reminder.snoozeCount}
-                      onActionComplete={() => fetchTodayReminders()}
-                    />
+                  {/* Mobile Action Buttons */}
+                  {isMobile && reminder.status === "pending" && (
+                    <div className="pt-2 border-t border-border">
+                      <ActionButtonsWithStatus
+                        reminderId={reminder.id}
+                        status={reminder.status}
+                        currentSnoozeCount={reminder.snoozeCount}
+                        onActionComplete={() => fetchTodayReminders()}
+                        className="justify-center"
+                      />
+                    </div>
                   )}
                 </div>
               );

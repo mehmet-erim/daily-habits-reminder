@@ -1,6 +1,10 @@
 import { Metadata } from "next";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ReminderList from "@/components/ReminderList";
+import {
+  MobileLayout,
+  MobileContainer,
+} from "@/components/mobile/MobileLayout";
 
 export const metadata: Metadata = {
   title: "Reminders - Daily Habits Tracker",
@@ -10,9 +14,11 @@ export const metadata: Metadata = {
 export default function RemindersPage() {
   return (
     <ProtectedRoute>
-      <div className="container mx-auto px-4 py-8">
-        <ReminderList />
-      </div>
+      <MobileLayout fullHeight enableSafeArea enableViewportFix>
+        <MobileContainer className="py-6">
+          <ReminderList />
+        </MobileContainer>
+      </MobileLayout>
     </ProtectedRoute>
   );
 }
