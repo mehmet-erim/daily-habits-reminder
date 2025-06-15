@@ -1,13 +1,15 @@
 import { NextRequest } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { createCounterSchema } from "@/lib/validations";
 import {
   withAuth,
   withAuthValidation,
   withErrorHandling,
   createSuccessResponse,
   parseQueryParams,
+  buildWhereCondition,
   AuthenticatedRequest,
 } from "@/lib/api-helpers";
-import { createCounterSchema } from "@/lib/validations";
 import {
   getTodayCounters,
   getOrCreateCounter,

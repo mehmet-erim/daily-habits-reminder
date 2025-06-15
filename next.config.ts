@@ -8,46 +8,15 @@ const nextConfig: NextConfig = {
     webVitalsAttribution: ["CLS", "LCP"],
   },
 
-  // Service Worker and PWA headers
+  // Service Worker and security headers only
   async headers() {
     return [
       {
         source: "/sw.js",
         headers: [
           {
-            key: "Cache-Control",
-            value: "public, max-age=0, must-revalidate",
-          },
-          {
             key: "Service-Worker-Allowed",
             value: "/",
-          },
-        ],
-      },
-      {
-        source: "/manifest.json",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      {
-        source: "/_next/static/(.*)",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      {
-        source: "/api/(.*)",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=300, s-maxage=600", // 5 min browser, 10 min CDN
           },
         ],
       },
@@ -78,10 +47,9 @@ const nextConfig: NextConfig = {
   // Enable compression
   compress: true,
 
-  // Optimize images
+  // Basic image optimization
   images: {
     formats: ["image/webp", "image/avif"],
-    minimumCacheTTL: 31536000,
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
